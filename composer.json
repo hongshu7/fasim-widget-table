@@ -1,6 +1,6 @@
 {
-    "name": "lhs168/fasim-widget-form",
-    "description": "a form widget for fasim",
+    "name": "lhs168/fasim-widget-table",
+    "description": "a table widget for fasim",
     "type": "library",
     "license": "GPL",
     "authors": [
