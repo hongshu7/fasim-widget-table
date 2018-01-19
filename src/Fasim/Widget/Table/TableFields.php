@@ -137,7 +137,7 @@ class LinkField extends TextField {
 class ImageField extends TextField {
 	public function render() {
 		$value = parent::render();
-		$url = Table::getImageUrl($value);
+		$url = TableBuilder::getImageUrl($value);
 		return "<img src=\"$url\" style=\"width:100%;\" />";
 	}
 }
@@ -264,7 +264,7 @@ class LinkButton {
 	public function render() {
 		$buttonStyle =  $this->buttonStyle == '' ? '' : ' btn-'.$this->buttonStyle;
 		$icon =  $this->iconStyle == '' ? '' : "<i class=\"fa fa-{$this->iconStyle}\"></i>";
-		$url = Table::getAdminUrl($this->url);
+		$url = TableBuilder::getUrl($this->url);
 		return "<button class=\"btn{$buttonStyle}\" onclick=\"location.href='{$url}';\">{$icon}{$this->name}</button>";
 	}
 }
@@ -349,7 +349,7 @@ class LinkOperation {
 				$this->name = $result;
 			}
 		}
-		$url = Table::getAdminUrl($this->url);
+		$url = TableBuilder::getUrl($this->url);
 		$url = $this->filterValue($url);
 		
 		$attrs = $this->attrs;
