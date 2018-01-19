@@ -175,7 +175,7 @@ class TextSearch extends Search {
 
 	public function render() {
 		$key = 's_'.$this->key;
-		return "<input id=\"{$key}\"name=\"{$key}\" value=\"{$this->value}\" type=\"text\" placeholder=\"{$this->placeholder}\" /> \n";
+		return "<input id=\"{$key}\" class=\"form-control\" name=\"{$key}\" value=\"{$this->value}\" type=\"text\" placeholder=\"{$this->placeholder}\" /> \n";
 	}
 }
 
@@ -195,7 +195,7 @@ class SelectSearch extends Search {
 	public function render() {
 		$key = 's_'.$this->key;
 		$nl = "\n";
-		$html = "<select id=\"{$key}\"name=\"{$key}\" class=\"input-small\"> \n";
+		$html = "<select id=\"{$key}\" class=\"form-control\" name=\"{$key}\"> \n";
 		foreach ($this->values as $t => $v) {
 			$selected = $this->value === $v ? ' selected="selected"' : '';
 			$html .=  "<option value=\"{$v}\"{$selected}>{$t}</option> \n";

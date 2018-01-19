@@ -157,7 +157,7 @@ class TableBuilder {
 				}
 				$search .= $item->render();
 			}
-			$search .= '<button type="submit" class="btn">搜索</button>';
+			$search .= '<button type="submit" class="btn btn-default">搜索</button>';
 			$search .= '</form>'.$nl;
 		}
 
@@ -175,7 +175,7 @@ class TableBuilder {
 		//list
 		$list = '<table class="table table-striped table-bordered table-hover">'.$nl;
 		$list .= '<thead>'.$nl;
-		$list .= '<tr class="table-heading">'.$nl;
+		$list .= '<tr>'.$nl;
 		foreach ($this->fields as $field) {
 			$widthAttr = $field->width == 0 ? '' : ' width="' . $field->width .'"';
 			$list .= "<th{$widthAttr}>{$field->name}</th> \n";
@@ -232,12 +232,12 @@ class TableBuilder {
 		$list .= '</table>'.$nl;
 
 		//pagination
-		$pagination = '<div class="pagination">'.$nl;
-		$pagination .= '<ul><li>'.$nl;
-		$pagination .= "<span style=\"width:88px\">共 <span style=\"color:red\">{$this->pager->totalCount}</span> 条记录</span>".$nl;
+		$pagination = '<nav>'.$nl;
+		$pagination .= '<ul class="pagination"><li>'.$nl;
+		$pagination .= "<span>共 <i style=\"color:red;font-style:normal;\">{$this->pager->totalCount}</i> 条记录</span>".$nl;
 		$pagination .= '</li></ul>'.$nl;
 		$pagination .= $this->pager->pagecute().$nl;
-		$pagination .= '</div>'.$nl;
+		$pagination .= '</nav>'.$nl;
 				
 
 		return [
