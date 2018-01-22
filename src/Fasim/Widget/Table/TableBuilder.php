@@ -68,41 +68,9 @@ class TableBuilder {
 		return $this;
 	}
 
-	public function newTextField($name, $key, $width=0) {
-		return new TextField($name, $key, $width);
-	}
-
-	public function newLinkField($name, $key, $url, $width=0) {
-		return new LinkField($name, $key, $url, $width);
-	}
-
-	public function newImageField($name, $key, $width=0) {
-		return new ImageField($name, $key, $width);
-	}
-
-	public function newSelectSearch($key, $values) {
-		return new SelectSearch($key, $values);
-	}
-
-	public function newTextSearch($key, $placeholder) {
-		return new TextSearch($key, $placeholder);
-	}
-
-	public function newLinkButton($name, $url) {
-		return new LinkButton($name, $url);
-	}
-
-	public function newButtonGroup($buttons=[]) {
-		return new ButtonGroup($buttons);
-	}
-
 	public function addOperation($operations) {
 		$this->operations[] = $operations;
 		return $this;
-	}
-
-	public function newLinkOperation($name='', $url='') {
-		return new LinkOperation($name, $url);
 	}
 
 	public function data($data) {
@@ -246,6 +214,39 @@ class TableBuilder {
 			'list' => $list,
 			'pagination' => $pagination
  		];
+	}
+
+
+	public static function newTextField($name, $key, $width=0) {
+		return new TextField($name, $key, $width);
+	}
+
+	public static function newLinkField($name, $key, $url, $width=0) {
+		return new LinkField($name, $key, $url, $width);
+	}
+
+	public static function newImageField($name, $key, $width=0) {
+		return new ImageField($name, $key, $width);
+	}
+
+	public static function newSelectSearch($key, $values) {
+		return new SelectSearch($key, $values);
+	}
+
+	public static function newTextSearch($key, $placeholder) {
+		return new TextSearch($key, $placeholder);
+	}
+
+	public static function newLinkButton($name, $url) {
+		return new LinkButton($name, $url);
+	}
+
+	public static function newButtonGroup($buttons=[]) {
+		return new ButtonGroup($buttons);
+	}
+
+	public static function newLinkOperation($name='', $url='') {
+		return new LinkOperation($name, $url);
 	}
 
 	public static function getUrl($url) {
