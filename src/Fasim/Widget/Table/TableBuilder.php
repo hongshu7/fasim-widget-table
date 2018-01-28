@@ -30,10 +30,8 @@ class TableBuilder {
 		foreach ($_GET as $k => $v) {
 			if ($k === 'page') {
 				$this->pager->page = intval($v);
-			} else if (strlen($k) > 2 && substr($k, 0, 2) == 's_') {
-				$qk = substr($k, 2);
-				$this->querys[$qk] = $v;
 			}
+			$this->querys[$k] = $v;
 		}
 
 		$this->baseUrl = Config::baseUrl();
@@ -230,6 +228,10 @@ class TableBuilder {
 
 	public static function newImageField($name, $key, $width=0) {
 		return new ImageField($name, $key, $width);
+	}
+
+	public static function newHiddenSearch($key, $value) {
+		return new HiddenSearch($key, $value);
 	}
 
 	public static function newSelectSearch($key, $values) {

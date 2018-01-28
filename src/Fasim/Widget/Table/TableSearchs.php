@@ -22,13 +22,14 @@ abstract class Search {
 class HiddenSearch extends Search {
 	public $placeholder;
 
-	public function __construct($key) {
-		$this->key = $key;
+	public function __construct($key, $value) {
+        $this->key = $key;
+        $this->value = $value;
 	}
 
 	public function render() {
-		$key = 's_'.$this->key;
-		return "<input id=\"{$key}\" name=\"{$key}\" value=\"{$this->value}\" type=\"hidden\" /> \n";
+        $key = $this->key;
+		return "<input id=\"ts_{$key}\" name=\"{$key}\" value=\"{$this->value}\" type=\"hidden\" /> \n";
 	}
 }
 
@@ -46,8 +47,8 @@ class TextSearch extends Search {
 	}
 
 	public function render() {
-		$key = 's_'.$this->key;
-		return "<input id=\"{$key}\" class=\"form-control\" name=\"{$key}\" value=\"{$this->value}\" type=\"text\" placeholder=\"{$this->placeholder}\" /> \n";
+		$key = $this->key;
+		return "<input id=\"ts_{$key}\" class=\"form-control\" name=\"{$key}\" value=\"{$this->value}\" type=\"text\" placeholder=\"{$this->placeholder}\" /> \n";
 	}
 }
 
@@ -65,9 +66,9 @@ class SelectSearch extends Search {
 	}
 
 	public function render() {
-		$key = 's_'.$this->key;
+		$key = $this->key;
 		$nl = "\n";
-		$html = "<select id=\"{$key}\" class=\"form-control\" name=\"{$key}\"> \n";
+		$html = "<select id=\"ts_{$key}\" class=\"form-control\" name=\"{$key}\"> \n";
 		foreach ($this->values as $t => $v) {
 			$selected = $this->value === $v ? ' selected="selected"' : '';
 			$html .=  "<option value=\"{$v}\"{$selected}>{$t}</option> \n";
