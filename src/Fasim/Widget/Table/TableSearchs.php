@@ -171,7 +171,7 @@ class DateSearch extends TextSearch {
 		$style = $this->getStyle();
 		$readonly = $this->readonly ? ' readonly="readonly"' : '';
 		$html = '<div class="input-group date">'."\n";
-		$html .= "<input id=\"i_{$this->key}\" type=\"text\" name=\"n_{$this->key}\" placeholder=\"{$this->placeholder}\" value=\"{$this->value}\" class=\"form-control datepicker\"{$style}{$readonly} ";
+		$html .= "<input id=\"ts_{$this->key}\" type=\"text\" name=\"{$this->key}\" placeholder=\"{$this->placeholder}\" value=\"{$this->value}\" class=\"form-control datepicker\"{$style}{$readonly} ";
 		foreach ($this->options as $ok => $ov) {
 			$html .= " data-date-{$ok}=\"{$ov}\"";
 		}
