@@ -35,7 +35,7 @@ class TableBuilder {
 		}
 
 		$this->baseUrl = Config::baseUrl();
-		$this->imageUrl = Config::get('url.cdn');
+		$this->imageUrl = $this->setImageUrl(Config::get('url.cdn'));
 
 		if (self::$instance == null) {
 			self::$instance = $this;
@@ -234,12 +234,16 @@ class TableBuilder {
 		return new HiddenSearch($key, $value);
 	}
 
-	public static function newSelectSearch($key, $values) {
-		return new SelectSearch($key, $values);
+	public static function newTextSearch($key, $placeholder, $value ='') {
+		return new TextSearch($key, $placeholder, $value);
 	}
 
-	public static function newTextSearch($key, $placeholder) {
-		return new TextSearch($key, $placeholder);
+	public static function newSelectSearch($key, $placeholder, $options) {
+		return new SelectSearch($key, $placeholder, $options);
+	}
+
+	public static function newDateSearch($key, $placeholder, $value ='') {
+		return new DateSearch($key, $placeholder, $value);
 	}
 
 	public static function newLinkButton($name, $url) {
