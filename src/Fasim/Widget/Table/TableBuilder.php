@@ -26,11 +26,8 @@ class TableBuilder {
 		$this->pager = new Pager();
 		$this->pager->pageSize = 20;
 		$this->pager->style = Pager::Bootstrap;
-		$this->pager->url = '?page={page}';
+		$this->pager->url = '{querys}&page={page}';
 		foreach ($_GET as $k => $v) {
-			if ($k === 'page') {
-				$this->pager->page = intval($v);
-			}
 			$this->querys[$k] = $v;
 		}
 
@@ -117,12 +114,14 @@ class TableBuilder {
 
 		//search
 		$search = '';
+		$querys = [];
 		if (count($this->searchs) > 0) {
 			$search = '<form class="search form-inline right">'.$nl;
 			foreach ($this->searchs as $item) {
 				$sk = $item->key;
 				if (isset($this->querys[$sk])) {
 					$item->value($this->querys[$sk]);
+					$querys[$sk] = $this->querys[$sk];
 				}
 				$search .= $item->render();
 			}
@@ -201,6 +200,24 @@ class TableBuilder {
 		$list .= '</table>'.$nl;
 
 		//pagination
+		$pageUrl = $this->pager->url;
+		$queryStr = '';
+		if (count($querys) > 0) {
+			$queryStr = http_build_query($querys);
+		}
+		$pageUrl = str_replace('&{querys}', '{querys}', $pageUrl);
+		$pageUrl = str_replace('?{querys}', '{querys}', $pageUrl);
+		$pageUrl = str_replace('{querys}', $queryStr, $pageUrl);
+		if ($pageUrl{0} == '&') {
+			$pageUrl = '?'.substr($pageUrl, 1);
+		}
+		if ($pageUrl{0} != '?') {
+			$pageUrl = '?'.$pageUrl;
+		}
+		$this->pager->url = $pageUrl;
+		if (isset($this->querys['page'])) {
+			$this->pager->page = intval($this->querys['page']);
+		}
 		$pagination = '<nav>'.$nl;
 		$pagination .= '<ul class="pagination"><li>'.$nl;
 		$pagination .= "<span>共 <i style=\"color:red;font-style:normal;\">{$this->pager->totalCount}</i> 条记录</span>".$nl;
