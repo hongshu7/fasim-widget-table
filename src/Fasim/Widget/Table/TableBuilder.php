@@ -30,6 +30,9 @@ class TableBuilder {
 		foreach ($_GET as $k => $v) {
 			$this->querys[$k] = $v;
 		}
+		if (isset($this->querys['page'])) {
+			$this->pager->page = intval($this->querys['page']);
+		}
 
 		$this->baseUrl = Config::baseUrl();
 		$this->imageUrl = $this->setImageUrl(Config::get('url.cdn'));
@@ -215,17 +218,15 @@ class TableBuilder {
 			$pageUrl = '?'.$pageUrl;
 		}
 		$this->pager->url = $pageUrl;
-		if (isset($this->querys['page'])) {
-			$this->pager->page = intval($this->querys['page']);
-		}
+		// if (isset($this->querys['page'])) {
+		// 	$this->pager->page = intval($this->querys['page']);
+		// }
 		$pagination = '<nav>'.$nl;
 		$pagination .= '<ul class="pagination"><li>'.$nl;
 		$pagination .= "<span>共 <i style=\"color:red;font-style:normal;\">{$this->pager->totalCount}</i> 条记录</span>".$nl;
 		$pagination .= '</li></ul>'.$nl;
 		$pagination .= $this->pager->pagecute().$nl;
 		$pagination .= '</nav>'.$nl;
-				
-
 		return [
 			'search' => $search,
 			'buttons' => $buttons,
