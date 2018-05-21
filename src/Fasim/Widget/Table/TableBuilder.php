@@ -18,6 +18,9 @@ class TableBuilder {
 	private $imageUrl = '';
 	private $pager = null;
 
+	private $formClass = 'search form-inline right';
+	private $tableClass = 'table table-striped table-bordered table-hover';
+
 	private static $instance = null;
 	
 	public function __construct() {
@@ -43,16 +46,32 @@ class TableBuilder {
 	}
 
 	public function setBaseUrl($url) {
+		return $this->baseUrl($url);
+	}
+
+	public function setImageUrl($url) {
+		return $this->imageUrl($url);
+	}
+
+	public function baseUrl($url) {
 		$this->baseUrl = $url;
 		return $this;
 	}
 
-	public function setImageUrl($url) {
+	public function imageUrl($url) {
 		$this->imageUrl = $url;
 		if ($this->imageUrl == '' || substr($this->imageUrl, -1) != '/') {
 			$this->imageUrl .= '/';
 		}
 		return $this;
+	}
+
+	public function tableClass($tableClass) {
+		$this->tableClass = $tableClass;
+	}
+
+	public function formClass($formClass) {
+		$this->formClass = $formClass;
 	}
 
 	public function addField($field) {
@@ -119,7 +138,7 @@ class TableBuilder {
 		$search = '';
 		$querys = [];
 		if (count($this->searchs) > 0) {
-			$search = '<form class="search form-inline right">'.$nl;
+			$search = '<form class="'.$this->formClass.'">'.$nl;
 			foreach ($this->searchs as $item) {
 				$sk = $item->key;
 				if (isset($this->querys[$sk])) {
@@ -144,15 +163,19 @@ class TableBuilder {
 	
 
 		//list
-		$list = '<table class="table table-striped table-bordered table-hover">'.$nl;
+		$list = '<table class="'.$this->tableClass.'">'.$nl;
 		$list .= '<thead>'.$nl;
 		$list .= '<tr>'.$nl;
 		foreach ($this->fields as $field) {
 			$widthAttr = $field->width == 0 ? '' : ' width="' . $field->width .'"';
-			$list .= "<th{$widthAttr}>{$field->name}</th> \n";
+			$alignStyle = '';
+			if ($field->textAlign != '') {
+				$alignStyle = ' style="text-align:' . $field->textAlign . '"';
+			}
+			$list .= "<th{$widthAttr}{$alignStyle}>{$field->name}</th> \n";
 		}
 		if (count($this->operations) > 0) {
-			$list .= "<th width=\"*\">操作</th> \n";
+			$list .= "<th width=\"*\" style=\"text-align:left;\">操作</th> \n";
 		}
 		$list .= '</tr>'.$nl;
 		$list .= '</thead>'.$nl;

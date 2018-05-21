@@ -33,12 +33,16 @@ abstract class Field {
 
 class TextField extends Field {
 	public $textAlign = '';
-	public $color = '';
+	
 	private $useSwitch = false;
 	private $cases = [];
 	private $default = '';
 	private $callback = null;
 	private $vars = [];
+	public $color = '';
+	public $bold = false;
+	public $italic = false;
+	public $styleCases = [];
 
 	public function textAlign($textAlign) {
 		$this->textAlign = $textAlign;
@@ -50,29 +54,77 @@ class TextField extends Field {
 		return $this;
 	}
 
-	public function valueCase($c, $v) {
-		$this->useSwitch = true;
-		$this->cases[] = [
+	public function bold($bold) {
+		$this->bold = $bold;
+		return $this;
+	}
+
+	public function italic($italic) {
+		$this->italic = $italic;
+		return $this;
+	}
+
+	public function styleCase($c, $s=[]) {
+		$this->styleCases[] = [
 			'c' => $c,
-			'v' => $v
+			's' => $s
 		];
 		return $this;
 	}
 
-	public function valueMap($map) {
+	public function valueCase($k, $v, $c=null, $b=null, $i=null) {
 		$this->useSwitch = true;
-		foreach ($map as $c => $v) {
-			$this->cases[] = [
-				'c' => $c,
-				'v' => $v
-			];
+		$case = [
+			'k' => $k,
+			'v' => $v,
+		];
+		if ($c !== null) {
+			$case['c'] = $c;
+		}
+		if ($b !== null) {
+			$case['b'] = !!$b;
+		}
+		if ($i !== null) {
+			$case['i'] = !!$i;
+		}
+		$this->cases[] = $case;
+		return $this;
+	}
+
+	public function valueMap($map) {
+		foreach ($map as $k => $v) {
+			$c = null;
+			$b = null;
+			$i = null;
+			if (is_array($v)) {
+				if (isset($v['color'])) {
+					$case['c'] = $v['color'];
+				}
+				if (isset($v['bold'])) {
+					$case['b'] = !!$v['bold'];
+				}
+				if (isset($v['italic'])) {
+					$case['i'] = !!$v['italic'];
+				}
+				$v = isset($v['text']) ? $v['text'] : '';
+			}
+			$this->valueCase($k, $v, $c, $b, $i);
 		}
 		return $this;
 	}
 
-	public function valueDefault($v) {
+	public function valueDefault($v, $c=null, $b=null, $i=null) {
 		$this->useSwitch = true;
 		$this->default = $v;
+		if ($c !== null) {
+			$this->color = $c;
+		}
+		if ($b !== null) {
+			$this->bold = !!$b;
+		}
+		if ($i !== null) {
+			$this->italic = !!$i;
+		}
 		return $this;
 	}
 
@@ -88,11 +140,31 @@ class TextField extends Field {
 
 	public function render() {
 		$value = $this->value;
+		$styles = [];
+		if ($this->color) {
+			$styles['color'] = $this->color;
+		}
+		if ($this->bold) {
+			$styles['bold'] = true;
+		}
+		if ($this->italic) {
+			$styles['italic'] = $this->true;
+		}
+		
 		if ($this->useSwitch) {
 			$value = $this->default;
 			foreach ($this->cases as $case) {
-				if ($case['c'] === $this->value) {
+				if ($case['k'] === $this->value) {
 					$value = $case['v'];
+					if (isset($case['c']) && $case['c'] != '') {
+						$styles['color'] = $case['c'];
+					}
+					if (isset($case['b']) && $case['b']) {
+						$styles['bold'] = true;
+					}
+					if (isset($case['i']) && $case['i']) {
+						$styles['italic'] = true;
+					}
 					break;
 				}
 			}
@@ -105,8 +177,19 @@ class TextField extends Field {
 			}
 			$value = $callback(...$values);
 		}
-		if ($this->color != '') {
-			$value = "<span style=\"color:{$this->color};\">$value</span>";
+		
+		if (!empty($styles)) {
+			$style = '';
+			foreach ($styles as $sk => $sv) {
+				if ($sk == 'color') {
+					$style .= "color:$sv;";
+				} else if ($sk == 'bold') {
+					$style .= "font-weight:bold;";
+				} else if ($sk == 'italic') {
+					$style .= "font-style:italic;";
+				}
+			}
+			$value = "<span style=\"$style\">$value</span>";
 		}
 
 		return $value;
