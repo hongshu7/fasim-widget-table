@@ -20,6 +20,9 @@ class TableBuilder {
 
 	private $formClass = 'search form-inline right';
 	private $tableClass = 'table table-striped table-bordered table-hover';
+	private $defaultAlign = 'left';
+	private $titleAlign = '';
+	private $operationAlign = '';
 
 	private static $instance = null;
 	
@@ -72,6 +75,16 @@ class TableBuilder {
 
 	public function formClass($formClass) {
 		$this->formClass = $formClass;
+	}
+
+	public function defaultAlign($defaultAlign) {
+		$this->defaultAlign = $defaultAlign;
+		return $this;
+	}
+
+	public function operationAlign($operationAlign) {
+		$this->operationAlign = $operationAlign;
+		return $this;
 	}
 
 	public function addField($field) {
@@ -168,14 +181,19 @@ class TableBuilder {
 		$list .= '<tr>'.$nl;
 		foreach ($this->fields as $field) {
 			$widthAttr = $field->width == 0 ? '' : ' width="' . $field->width .'"';
-			$alignStyle = '';
+			$textAlign = $this->defaultAlign;
 			if ($field->textAlign != '') {
-				$alignStyle = ' style="text-align:' . $field->textAlign . '"';
+				$textAlign = $field->textAlign;
 			}
+			$alignStyle = ' style="text-align:' . $textAlign . '"';
 			$list .= "<th{$widthAttr}{$alignStyle}>{$field->name}</th> \n";
 		}
 		if (count($this->operations) > 0) {
-			$list .= "<th width=\"*\" style=\"text-align:left;\">操作</th> \n";
+			$textAlign = $this->defaultAlign;
+			if ($this->operationAlign != '') {
+				$textAlign = $this->operationAlign;
+			}
+			$list .= "<th width=\"*\" style=\"text-align:{$textAlign};\">操作</th> \n";
 		}
 		$list .= '</tr>'.$nl;
 		$list .= '</thead>'.$nl;
@@ -201,14 +219,19 @@ class TableBuilder {
 					$values[$key] = $v;
 				}
 				$field->value = is_array($field->key) ? $values : $values[$field->key];
-				$alignStyle = '';
+				$textAlign = $this->defaultAlign;
 				if ($field->textAlign != '') {
-					$alignStyle = ' style="text-align:' . $field->textAlign . '"';
+					$textAlign = $field->textAlign;
 				}
+				$alignStyle = ' style="text-align:' . $textAlign . '"';
 				$list .= "<td{$alignStyle}> \n" . $field->render() . " \n </td>".$nl;
 			}
 			if (count($this->operations) > 0) {
-				$list .= "<td> \n";
+				$textAlign = $this->defaultAlign;
+				if ($this->operationAlign != '') {
+					$textAlign = $this->operationAlign;
+				}
+				$list .= "<td style=\"text-align:{$textAlign};\"> \n";
 				for ($oi = 0; $oi < count($this->operations); $oi++) {
 					$opt = $this->operations[$oi];
 					$opt->data = $row;
