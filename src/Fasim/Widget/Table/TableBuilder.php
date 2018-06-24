@@ -11,6 +11,9 @@ class TableBuilder {
 	private $operations = [];
 	private $searchs = [];
 	private $buttons = [];
+	
+	private $sortBy = '';
+	private $sortOrder = 'ASC';
 
 	private $querys = [];
 
@@ -39,6 +42,15 @@ class TableBuilder {
 		if (isset($this->querys['page'])) {
 			$this->pager->page = intval($this->querys['page']);
 		}
+		if (isset($this->querys['sortby'])) {
+			$this->sortBy = trim($this->querys['sortby']);
+		}
+		if (isset($this->querys['sortorder'])) {
+			$this->sortOrder = strtoupper(trim($this->querys['sortorder']));
+			if ($this->sortOrder != 'DESC') {
+				$this->sortOrder = 'ASC';
+			}
+		}
 
 		$this->baseUrl = Config::baseUrl();
 		$this->imageUrl = $this->setImageUrl(Config::get('url.cdn'));
@@ -65,6 +77,15 @@ class TableBuilder {
 		$this->imageUrl = $url;
 		if ($this->imageUrl == '' || substr($this->imageUrl, -1) != '/') {
 			$this->imageUrl .= '/';
+		}
+		return $this;
+	}
+
+	public function sort($by, $order='ASC') {
+		$this->sortBy = $by;
+		$this->sortOrder = strtoupper($order);
+		if ($this->sortOrder != 'DESC') {
+			$this->sortOrder = 'ASC';
 		}
 		return $this;
 	}
@@ -173,9 +194,11 @@ class TableBuilder {
 			}
 			$buttons .= '</div>'.$nl;
 		}
-	
+		
+		$requestUrl = $_SERVER['REQUEST_URI'];
+		$sortUrl = preg_replace('/[\?&](page|sortby|sortorder)=\w*/i', '', $requestUrl);
+		$sortUrl .= (strpos($sortUrl, '?') === false ? '?' : '&') . 'sortby=';
 
-		//list
 		$list = '<table class="'.$this->tableClass.'">'.$nl;
 		$list .= '<thead>'.$nl;
 		$list .= '<tr>'.$nl;
@@ -186,7 +209,22 @@ class TableBuilder {
 				$textAlign = $field->textAlign;
 			}
 			$alignStyle = ' style="text-align:' . $textAlign . '"';
-			$list .= "<th{$widthAttr}{$alignStyle}>{$field->name}</th> \n";
+			
+			$nameHtml = $field->name;
+			if ($field->sortable) {
+				$url = $sortUrl.$field->key;
+				$order = 'ASC';
+				$arrow = '';
+				if ($this->sortBy == $field->key) {
+					$arrow = $this->sortOrder == 'ASC' ? '↓' : '↑';
+					if ($this->sortOrder == 'ASC') {
+						$order = 'DESC';
+					}
+				}
+				$url .= '&sortorder='.$order;
+				$nameHtml = "<a href=\"{$url}\">".$field->name.$arrow.'</a>';
+			}
+			$list .= "<th{$widthAttr}{$alignStyle}>{$nameHtml}</th> \n";
 		}
 		if (count($this->operations) > 0) {
 			$textAlign = $this->defaultAlign;
@@ -257,6 +295,9 @@ class TableBuilder {
 		$pageUrl = str_replace('&{querys}', '{querys}', $pageUrl);
 		$pageUrl = str_replace('?{querys}', '{querys}', $pageUrl);
 		$pageUrl = str_replace('{querys}', $queryStr, $pageUrl);
+		if ($this->sortBy != '') {
+			$pageUrl .= "&sortby={$this->sortBy}&sortorder={$this->sortOrder}";
+		}
 		if ($pageUrl{0} == '&') {
 			$pageUrl = '?'.substr($pageUrl, 1);
 		}

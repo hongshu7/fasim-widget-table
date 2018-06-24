@@ -10,6 +10,7 @@ abstract class Field {
 	public $key;
 	public $value = '';
 	public $width = 0;
+	public $sortable = false;
 
 	public function __construct($name, $key, $width = 0) {
 		$this->name = $name;
@@ -24,6 +25,16 @@ abstract class Field {
 
 	public function key($key) {
 		$this->key = $key;
+		return $this;
+	}
+
+	public function width($width) {
+		$this->width = $width;
+		return $this;
+	}
+
+	public function sortable($sortable) {
+		$this->sortable = $sortable;
 		return $this;
 	}
 
