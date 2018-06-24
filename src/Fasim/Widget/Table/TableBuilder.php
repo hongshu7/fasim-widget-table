@@ -12,8 +12,8 @@ class TableBuilder {
 	private $searchs = [];
 	private $buttons = [];
 	
-	private $sortBy = '';
-	private $sortOrder = 'ASC';
+	public $sortBy = '';
+	public $sortOrder = 'ASC';
 
 	private $querys = [];
 
@@ -82,10 +82,12 @@ class TableBuilder {
 	}
 
 	public function sort($by, $order='ASC') {
-		$this->sortBy = $by;
-		$this->sortOrder = strtoupper($order);
-		if ($this->sortOrder != 'DESC') {
-			$this->sortOrder = 'ASC';
+		if ($this->sortBy == '') {
+			$this->sortBy = $by;
+			$this->sortOrder = strtoupper($order);
+			if ($this->sortOrder != 'DESC') {
+				$this->sortOrder = 'ASC';
+			}
 		}
 		return $this;
 	}
