@@ -11,6 +11,7 @@ class TableBuilder {
 	private $operations = [];
 	private $searchs = [];
 	private $buttons = [];
+	private $actions = [];
 	
 	public $sortBy = '';
 	public $sortOrder = 'ASC';
@@ -19,8 +20,10 @@ class TableBuilder {
 
 	private $baseUrl = '';
 	private $imageUrl = '';
+	private $actionUrl = '/action';
 	private $pager = null;
 
+	private $idKey = 'id';
 	private $formClass = 'search form-inline right';
 	private $tableClass = 'table table-striped table-bordered table-hover';
 	private $defaultAlign = 'left';
@@ -81,6 +84,16 @@ class TableBuilder {
 		return $this;
 	}
 
+	public function idKey($idKey) {
+		$this->idKey = $idKey;
+		return $this;
+	}
+
+	public function actionUrl($actionUrl) {
+		$this->actionUrl = $actionUrl;
+		return $this;
+	}
+
 	public function sort($by, $order='ASC') {
 		if ($this->sortBy == '') {
 			$this->sortBy = $by;
@@ -124,8 +137,13 @@ class TableBuilder {
 		return $this;
 	}
 
-	public function addOperation($operations) {
-		$this->operations[] = $operations;
+	public function addOperation($operation) {
+		$this->operations[] = $operation;
+		return $this;
+	}
+
+	public function addAction($action) {
+		$this->actions[] = $action;
 		return $this;
 	}
 
@@ -183,8 +201,11 @@ class TableBuilder {
 				}
 				$search .= $item->render();
 			}
+			$search .= '<input type="hidden" name="pageSize" value="'.$this->pager->pageSize.'" />'.$nl;
 			$search .= '<button type="submit" class="btn btn-default">搜索</button>';
 			$search .= '</form>'.$nl;
+
+			$querys['pageSize'] = $this->pager->pageSize;
 		}
 
 		//buttons
@@ -201,9 +222,18 @@ class TableBuilder {
 		$sortUrl = preg_replace('/[\?&](page|sortby|sortorder)=\w*/i', '', $requestUrl);
 		$sortUrl .= (strpos($sortUrl, '?') === false ? '?' : '&') . 'sortby=';
 
-		$list = '<table class="'.$this->tableClass.'">'.$nl;
+		$hasActions = count($this->actions) > 0;
+		if ($hasActions) {
+			$actionUrl = TableBuilder::getUrl($this->actionUrl);
+			//if ($actionUrl)
+			$list .= '<form action="'.$actionUrl.'" method="post">'.$nl;
+		}
+		$list .= '<table class="'.$this->tableClass.'">'.$nl;
 		$list .= '<thead>'.$nl;
 		$list .= '<tr>'.$nl;
+		if ($hasActions) {
+			$list .= '<th width="30" style="text-align:center;"><input type="checkbox" id="checkall" value="" /></th>'.$nl;
+		}
 		foreach ($this->fields as $field) {
 			$widthAttr = $field->width == 0 ? '' : ' width="' . $field->width .'"';
 			$textAlign = $this->defaultAlign;
@@ -240,6 +270,16 @@ class TableBuilder {
 		$list .= '<tbody>'.$nl;
 		foreach ($this->data as $row) {
 			$list .= '<tr>'.$nl;
+			if ($hasActions) {
+				$k = $this->idKey;
+				$cval = '';
+				if (is_object($row) && isset($row->$k)) {
+					$cval = $row->$k;
+				} else if (is_array($row) && isset($row[$k])) {
+					$cval = $row[$k];
+				}
+				$list .= '<td style="text-align:center;"><input type="checkbox" name="ids[]" value="'.$cval.'" /></td>'.$nl;
+			}
 			foreach ($this->fields as $field) {
 				$keys = is_array($field->key) ? $field->key : [$field->key];
 				$values = [];
@@ -287,6 +327,55 @@ class TableBuilder {
 		}
 		$list .= '</tbody>'.$nl;
 		$list .= '</table>'.$nl;
+		if ($hasActions) {
+			$list .= '<div class="form-group form-actions">'.$nl;
+			$list .= '批量操作： ';
+			foreach ($this->actions as $action) {
+				$list .= $action->render().$nl;
+			}
+			$list .= '</div>'.$nl;
+			$list .= <<<EOT
+</form>
+<script>
+function whenReady(callback) {
+	if (typeof $ != 'undefined') {
+		$(callback);
+	} else {
+		setTimeout(function(){ whenReady(callback); }, 10);
+	}
+}
+whenReady(function() { 
+	$('.form-actions button').click(function() {
+		var count = $('input:checkbox[name^=ids]').filter(':checked').length;
+		if (count == 0) {
+			alert('没有选任何帖子。');
+			return false;
+		}
+		var actionName = $(this).text().replace(/\s+/g, '');
+		var result = confirm('确定要对' + count + '个帖子执行“'+actionName+'”操作吗？');
+		if (result && $(this).attr('jscallback') != '') {
+			var ids = [];
+			$('input:checkbox[name^=ids]').filter(':checked').each(function() {
+				ids.push($(this).val());
+			});
+			var jscallback = $(this).attr('jscallback');
+			//console.log($(this).val(), ids);
+			var fn = window[jscallback];
+			if (typeof fn === 'function') {
+				fn($(this).val(), ids);
+			}
+			return false;
+		}
+		return result;
+	});
+	$('#checkall').click(function() {
+		var checked = $(this).prop('checked');
+		$('input:checkbox[name^=ids]').prop('checked', checked);
+	});
+});
+</script>
+EOT;
+		}
 
 		//pagination
 		$pageUrl = $this->pager->url;
@@ -297,6 +386,7 @@ class TableBuilder {
 		$pageUrl = str_replace('&{querys}', '{querys}', $pageUrl);
 		$pageUrl = str_replace('?{querys}', '{querys}', $pageUrl);
 		$pageUrl = str_replace('{querys}', $queryStr, $pageUrl);
+		
 		if ($this->sortBy != '') {
 			$pageUrl .= "&sortby={$this->sortBy}&sortorder={$this->sortOrder}";
 		}
@@ -310,11 +400,27 @@ class TableBuilder {
 		// if (isset($this->querys['page'])) {
 		// 	$this->pager->page = intval($this->querys['page']);
 		// }
+		$pageSizeUrl = preg_replace('/[\?&]+page={page}/i', '', $pageUrl);
+		$pageSizeUrl = preg_replace('/[\?&]+pageSize=\d*/i', '', $pageSizeUrl).'&page=1&pageSize=';
+		if ($pageSizeUrl{0} == '&') {
+			$pageSizeUrl = '?'.substr($pageSizeUrl, 1);
+		}
+		//echo $pageSizeUrl;exit();
+		$psSelected = ' selected="selected"';
 		$pagination = '<nav>'.$nl;
 		$pagination .= '<ul class="pagination"><li>'.$nl;
 		$pagination .= "<span>共 <i style=\"color:red;font-style:normal;\">{$this->pager->totalCount}</i> 条记录</span>".$nl;
 		$pagination .= '</li></ul>'.$nl;
 		$pagination .= $this->pager->pagecute().$nl;
+		$pagination .= '<ul class="pagination"><li>'.$nl;
+		$pagination .= '<div class="form-inline" style="float:left;margin-left:5px;">每页显示 <select name="pageSize" class="form-control" onchange="location.href=\''.$pageSizeUrl.'\' + this.value;">';
+		$pagination .= '<option value="10"'.($this->pager->pageSize == 10 ? $psSelected : '').'>10条</option>';
+		$pagination .= '<option value="20"'.($this->pager->pageSize == 20 ? $psSelected : '').'>20条</option>';
+		$pagination .= '<option value="50"'.($this->pager->pageSize == 50 ? $psSelected : '').'>50条</option>';
+		$pagination .= '<option value="100"'.($this->pager->pageSize == 100 ? $psSelected : '').'>100条</option>';
+		$pagination .= '<option value="200"'.($this->pager->pageSize == 200 ? $psSelected : '').'>200条</option>';
+		$pagination .= '</select></div>'.$nl;
+		$pagination .= '</li></ul>'.$nl;
 		$pagination .= '</nav>'.$nl;
 		return [
 			'search' => $search,
@@ -363,6 +469,10 @@ class TableBuilder {
 
 	public static function newLinkOperation($name='', $url='') {
 		return new LinkOperation($name, $url);
+	}
+
+	public static function newAction($key='', $name='') {
+		return new Action($key, $name);
 	}
 
 	public static function getUrl($url) {
