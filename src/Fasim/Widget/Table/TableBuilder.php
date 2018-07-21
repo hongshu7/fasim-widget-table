@@ -55,8 +55,8 @@ class TableBuilder {
 			}
 		}
 
-		$this->baseUrl = Config::baseUrl();
-		$this->imageUrl = $this->setImageUrl(Config::get('url.cdn'));
+		$this->setBaseUrl(Config::baseUrl());
+		$this->setImageUrl(Config::get('url.cdn'));
 
 		if (self::$instance == null) {
 			self::$instance = $this;
